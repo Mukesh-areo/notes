@@ -1,38 +1,36 @@
-import docx
-from transformers import BertTokenizer, BertModel
-import torch
+from bs4 import BeautifulSoup
+import spacy
 from collections import defaultdict
-from sklearn.metrics.pairwise import cosine_similarity
 
-# Load pre-trained BERT model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
 
-# Function to preprocess text and get BERT embeddings
-def preprocess_and_get_embeddings(text):
-    input_ids = tokenizer.encode(text, add_special_tokens=True, return_tensors='pt')
-    with torch.no_grad():
-        outputs = model(input_ids)
-        embeddings = outputs.last_hidden_state.mean(dim=1).squeeze(0)
-    return embeddings
+# Function to tokenize and lemmatize text
+def preprocess_text(text):
+    doc = nlp(text)
+    tokens = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+    return tokens
 
-# Read the Word document
-doc = docx.Document("your_document.docx")
+# Read the HTML file
+with open("your_file.html", "r", encoding="utf-8") as file:
+    html_content = file.read()
+
+# Parse HTML content
+soup = BeautifulSoup(html_content, "html.parser")
 
 # Get the first paragraph as reference
-reference_paragraph = doc.paragraphs[0].text
-reference_embedding = preprocess_and_get_embeddings(reference_paragraph)
+reference_paragraph = soup.find("p").get_text()
+reference_words = set(preprocess_text(reference_paragraph))
 
 # Initialize a dictionary to store similar words for each paragraph
 similar_words_dict = defaultdict(set)
 
 # Iterate through subsequent paragraphs
-for paragraph in doc.paragraphs[1:]:
-    paragraph_text = paragraph.text
-    paragraph_embedding = preprocess_and_get_embeddings(paragraph_text)
-    
-    similarity = cosine_similarity(reference_embedding.unsqueeze(0), paragraph_embedding.unsqueeze(0))
-    similar_words_dict[paragraph_text].update(paragraph_text.split())
+for paragraph in soup.find_all("p")[1:]:
+    words = set(preprocess_text(paragraph.get_text()))
+    for word in words:
+        if word in reference_words:
+            similar_words_dict[paragraph.get_text()].add(word)
 
 # Print similar words for each paragraph
 for paragraph, similar_words in similar_words_dict.items():
