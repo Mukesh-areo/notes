@@ -1,0 +1,40 @@
+import docx
+from transformers import BertTokenizer, BertModel
+import torch
+from collections import defaultdict
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Load pre-trained BERT model and tokenizer
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertModel.from_pretrained('bert-base-uncased')
+
+# Function to preprocess text and get BERT embeddings
+def preprocess_and_get_embeddings(text):
+    input_ids = tokenizer.encode(text, add_special_tokens=True, return_tensors='pt')
+    with torch.no_grad():
+        outputs = model(input_ids)
+        embeddings = outputs.last_hidden_state.mean(dim=1).squeeze(0)
+    return embeddings
+
+# Read the Word document
+doc = docx.Document("your_document.docx")
+
+# Get the first paragraph as reference
+reference_paragraph = doc.paragraphs[0].text
+reference_embedding = preprocess_and_get_embeddings(reference_paragraph)
+
+# Initialize a dictionary to store similar words for each paragraph
+similar_words_dict = defaultdict(set)
+
+# Iterate through subsequent paragraphs
+for paragraph in doc.paragraphs[1:]:
+    paragraph_text = paragraph.text
+    paragraph_embedding = preprocess_and_get_embeddings(paragraph_text)
+    
+    similarity = cosine_similarity(reference_embedding.unsqueeze(0), paragraph_embedding.unsqueeze(0))
+    similar_words_dict[paragraph_text].update(paragraph_text.split())
+
+# Print similar words for each paragraph
+for paragraph, similar_words in similar_words_dict.items():
+    print(f"Paragraph: {paragraph}")
+    print(f"Similar Words: {similar_words}")
