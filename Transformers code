@@ -36,3 +36,59 @@ for paragraph in soup.find_all("p")[1:]:
 for paragraph, similar_words in similar_words_dict.items():
     print(f"Paragraph: {paragraph}")
     print(f"Similar Words: {similar_words}")
+
+
+
+
+
+
+
+from bs4 import BeautifulSoup
+import spacy
+from collections import defaultdict
+
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+# Function to tokenize and lemmatize text
+def preprocess_text(text):
+    doc = nlp(text)
+    tokens = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+    return tokens
+
+# Read the HTML file
+with open("your_file.html", "r", encoding="utf-8") as file:
+    html_content = file.read()
+
+# Parse HTML content
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Get the first paragraph as reference
+reference_paragraph = soup.find("p").get_text()
+reference_words = set(preprocess_text(reference_paragraph))
+
+# Initialize a dictionary to store similar words for each paragraph and table cell
+similar_words_dict = defaultdict(set)
+
+# Process paragraphs
+for paragraph in soup.find_all("p")[1:]:
+    words = set(preprocess_text(paragraph.get_text()))
+    for word in words:
+        if word in reference_words:
+            similar_words_dict[paragraph.get_text()].add(word)
+
+# Process table cells
+for table in soup.find_all("table"):
+    for row in table.find_all("tr"):
+        for cell in row.find_all("td"):
+            cell_text = cell.get_text()
+            words = set(preprocess_text(cell_text))
+            for word in words:
+                if word in reference_words:
+                    similar_words_dict[cell_text].add(word)
+
+# Print similar words for each paragraph and table cell
+for content, similar_words in similar_words_dict.items():
+    print(f"Content: {content}")
+    print(f"Similar Words: {similar_words}")
+
