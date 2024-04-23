@@ -176,5 +176,43 @@ highlight_repeated_content('your_html_file.html')
 
 
 
+______&&&&&&&&+-------
+from bs4 import BeautifulSoup
+import hashlib
+import random
+import string
+
+def get_random_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
+
+def highlight_repeated_content(html_file):
+    with open(html_file, 'r', encoding='utf-8') as file:
+        html_content = file.read()
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    divs = soup.find_all('div')
+    highlighted_content = {}
+
+    for i, div in enumerate(divs):
+        content_hash = hashlib.sha256(div.text.encode()).hexdigest()
+        if content_hash in highlighted_content:
+            div['style'] = 'background-color: {}'.format(highlighted_content[content_hash])
+        else:
+            color = get_random_color()
+            highlighted_content[content_hash] = color
+            div['style'] = 'background-color: {}'.format(color)
+
+    with open('highlighted.html', 'w', encoding='utf-8') as file:
+        file.write(str(soup))
+
+highlight_repeated_content('your_html_file.html')
+
+
+
+
+-----
+
+
+
 
 
