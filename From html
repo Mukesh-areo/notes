@@ -213,6 +213,19 @@ highlight_repeated_content('your_html_file.html')
 -----
 
 
+from bs4 import BeautifulSoup
+
+def prettify_html(html_file):
+    with open(html_file, 'r', encoding='utf-8') as file:
+        html_content = file.read()
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    pretty_html = soup.prettify()
+
+    with open('prettified.html', 'w', encoding='utf-8') as file:
+        file.write(pretty_html)
+
+prettify_html('your_html_file.html')
 
 
 
