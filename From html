@@ -148,3 +148,33 @@ for line in lines:
 
 
 
+
+
+
+
+_------------------
+
+
+from bs4 import BeautifulSoup
+
+def highlight_repeated_content(html_file):
+    with open(html_file, 'r', encoding='utf-8') as file:
+        html_content = file.read()
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    divs = soup.find_all('div')
+
+    for i, div in enumerate(divs):
+        for other_div in divs[i+1:]:
+            if div.text == other_div.text:
+                div['style'] = 'background-color: yellow;'
+
+    with open('highlighted.html', 'w', encoding='utf-8') as file:
+        file.write(str(soup))
+
+highlight_repeated_content('your_html_file.html')
+
+
+
+
+
