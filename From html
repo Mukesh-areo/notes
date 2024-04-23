@@ -45,6 +45,12 @@ for paragraph in paragraphs[1:]:
     print(f"Highlighted Paragraph: {highlighted_paragraph}")
 
 
+----------
+# Assuming paragraphs are within <div> tags with class="paragraph"
+divs = soup.find_all("div", class_="paragraph")
+paragraphs = [div.get_text() for div in divs]
+
+# Rest of the code remains the same
 
 
 
