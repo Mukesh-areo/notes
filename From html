@@ -45,3 +45,44 @@ div_content = [
 repeated_sentences, repeated_words = find_repeated_sentences_and_words(div_content)
 print("Repeated Sentences:", repeated_sentences)
 print("Repeated Words:", repeated_words)
+
+
+
+
+import spacy
+from collections import Counter
+import re
+
+def find_repeated_sentences_and_words(div_content):
+    # Load spaCy English model
+    nlp = spacy.load('en_core_web_md')
+
+    # Combine all div content into a single string
+    all_text = ' '.join(div_content)
+
+    # Split the text into sentences and words
+    sentences = re.findall(r'[^.!?]+[.!?]', all_text)
+
+    # Find repeated sentences and words
+    repeated_sentences = []
+    for i, sentence1 in enumerate(sentences):
+        doc1 = nlp(sentence1)
+        for sentence2 in sentences[i+1:]:
+            doc2 = nlp(sentence2)
+            similarity = doc1.similarity(doc2)
+            if similarity > 0.9:  # Adjust the threshold as needed
+                repeated_sentences.append((sentence1, sentence2))
+
+    return repeated_sentences
+
+div_content = [
+    "This is a sentence. This is another sentence.",
+    "This is a repeated sentence. This is a repeated sentence.",
+    "Word word word. Word word."
+]
+
+repeated_sentences = find_repeated_sentences_and_words(div_content)
+print("Repeated Sentences:")
+for sentence_pair in repeated_sentences:
+    print(sentence_pair)
+
