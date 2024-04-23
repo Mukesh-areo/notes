@@ -95,3 +95,50 @@ for line in lines[1:]:
     print(f"Similarity: {similarity}")
     print(f"Highlighted Line: {highlighted_line}")
 
+
+
+----------
+import spacy
+
+# Load English tokenizer, tagger, parser, NER, and word vectors
+nlp = spacy.load("en_core_web_sm")
+
+# Read the HTML file
+with open("example.htm", "r") as file:
+    html_content = file.read()
+
+# Extract lines from the HTML content
+lines = [line.strip() for line in html_content.split("\n") if line.strip()]
+
+# Tokenize and preprocess text
+doc1 = nlp(lines[0])
+tokens1 = set(token.text.lower() for token in doc1 if token.is_alpha)
+
+# Set to store similar words
+similar_words = set()
+
+# Calculate similarity and store similar words
+for line in lines[1:]:
+    doc2 = nlp(line)
+    tokens2 = set(token.text.lower() for token in doc2 if token.is_alpha)
+    
+    # Calculate similarity
+    similarity = len(tokens1.intersection(tokens2)) / len(tokens1.union(tokens2))
+    
+    # Add similar words to the set
+    similar_words.update(tokens2.intersection(tokens1))
+
+# Parse through lines and highlight similar words
+for line in lines:
+    doc = nlp(line)
+    highlighted_line = ""
+    for token in doc:
+        if token.text.lower() in similar_words:
+            highlighted_line += f"<span style='background-color: yellow;'>{token.text}</span> "
+        else:
+            highlighted_line += f"{token.text} "
+    
+    print(f"Highlighted Line: {highlighted_line}")
+
+
+
