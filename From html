@@ -1,0 +1,52 @@
+from bs4 import BeautifulSoup
+import spacy
+
+# Load English tokenizer, tagger, parser, NER, and word vectors
+nlp = spacy.load("en_core_web_sm")
+
+# Sample HTML content
+html_content = """
+<html>
+<body>
+<p>This is the first paragraph. It contains some words.</p>
+<p>This is the second paragraph. It has some different words.</p>
+<p>This is the third paragraph. It also contains some words.</p>
+</body>
+</html>
+"""
+
+# Parse the HTML content
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Extract text from paragraphs
+paragraphs = [p.get_text() for p in soup.find_all("p")]
+
+# Tokenize and preprocess text
+doc1 = nlp(paragraphs[0])
+tokens1 = set(token.text.lower() for token in doc1 if token.is_alpha)
+
+# Calculate similarity and highlight similar words
+for paragraph in paragraphs[1:]:
+    doc2 = nlp(paragraph)
+    tokens2 = set(token.text.lower() for token in doc2 if token.is_alpha)
+    
+    # Calculate similarity
+    similarity = len(tokens1.intersection(tokens2)) / len(tokens1.union(tokens2))
+    
+    # Highlight similar words
+    highlighted_paragraph = ""
+    for token in doc2:
+        if token.text.lower() in tokens1:
+            highlighted_paragraph += f"<span style='background-color: yellow;'>{token.text}</span> "
+        else:
+            highlighted_paragraph += f"{token.text} "
+    
+    print(f"Similarity: {similarity}")
+    print(f"Highlighted Paragraph: {highlighted_paragraph}")
+
+
+
+
+
+
+--+++++------
