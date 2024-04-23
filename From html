@@ -15,3 +15,33 @@ def extract_div_content(html_file):
 
 div_content = extract_div_content('your_html_file.html')
 print(div_content)
+
+
+
+
+from collections import Counter
+import re
+
+def find_repeated_sentences_and_words(div_content):
+    # Combine all div content into a single string
+    all_text = ' '.join(div_content)
+
+    # Split the text into sentences and words
+    sentences = re.findall(r'[^.!?]+[.!?]', all_text)
+    words = re.findall(r'\b\w+\b', all_text)
+
+    # Find repeated sentences and words
+    repeated_sentences = [sentence for sentence, count in Counter(sentences).items() if count > 1]
+    repeated_words = [word for word, count in Counter(words).items() if count > 1]
+
+    return repeated_sentences, repeated_words
+
+div_content = [
+    "This is a sentence. This is another sentence.",
+    "This is a repeated sentence. This is a repeated sentence.",
+    "Word word word. Word word."
+]
+
+repeated_sentences, repeated_words = find_repeated_sentences_and_words(div_content)
+print("Repeated Sentences:", repeated_sentences)
+print("Repeated Words:", repeated_words)
