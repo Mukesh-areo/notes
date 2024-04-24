@@ -138,3 +138,70 @@ if uploaded_file is not None:
         for content in extracted_contents:
             st.write(content)
 
+
+
+-------
+import streamlit as st
+from bs4 import BeautifulSoup
+
+def highlight_similar_sentences(html_content):
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all div tags with alternative tags
+    div_tags = soup.find_all('div', {'alternative': True})
+
+    # Dictionary to store div content and their corresponding colors
+    div_colors = {}
+    color_index = 0
+
+    # Loop through div tags to find similar content
+    for div_tag in div_tags:
+        content = div_tag.text
+        # Check if the content already exists in div_colors
+        if content not in div_colors:
+            # Find all alternative tags for the current div tag
+            alternatives = div_tag.find_all_next('div', {'alternative': True})
+            alternatives = [alt.text for alt in alternatives]
+            # Add the current content and its alternatives to div_colors
+            all_contents = [content] + alternatives
+            # Find other div tags with the same content or alternatives
+            similar_divs = soup.find_all('div', text=all_contents)
+            # Assign a color to the group of similar divs
+            color = f'color_{color_index}'
+            div_colors[color] = all_contents
+            color_index += 1
+            # Highlight the similar divs with the same color
+            for similar_div in similar_divs:
+                similar_div['class'] = [color]
+
+    # Add CSS style to highlight similar content
+    style = '<style>'
+    for color, contents in div_colors.items():
+        style += f'.{color} {{ background-color: yellow; }} '
+    style += '</style>'
+
+    # Add the style to the HTML content
+    soup.head.insert_after(BeautifulSoup(style, 'html.parser'))
+
+    # Return the modified HTML content
+    return soup.prettify()
+
+# Streamlit app
+st.title('Highlight Similar Sentences in HTML')
+
+# File uploader for HTML file
+uploaded_file = st.file_uploader("Upload an HTML file", type=["html"])
+
+if uploaded_file is not None:
+    # Read the uploaded file
+    html_content = uploaded_file.read().decode('utf-8')
+
+    # Button to trigger highlighting
+    if st.button('Highlight Similar Sentences'):
+        highlighted_html = highlight_similar_sentences(html_content)
+        # Display the highlighted HTML
+        st.write(highlighted_html, unsafe_allow_html=True)
+
+
+
