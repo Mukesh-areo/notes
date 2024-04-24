@@ -97,3 +97,44 @@ soup.head.insert_after(BeautifulSoup(style, 'html.parser'))
 
 # Print the modified HTML content
 print(soup.prettify())
+
+
+
+----++++-
+import streamlit as st
+from bs4 import BeautifulSoup
+
+def extract_div_contents(html_content, context_id):
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all div tags with the specified context ID
+    div_tags = soup.find_all('div', {'context_id': context_id})
+
+    # Extract the contents of the selected div tags
+    div_contents = [div_tag.text for div_tag in div_tags]
+
+    # Return the extracted contents as a list
+    return div_contents
+
+# Streamlit app
+st.title('Extract Contents of Div Tags by Context ID')
+
+# File uploader for HTML file
+uploaded_file = st.file_uploader("Upload an HTML file", type=["html"])
+
+if uploaded_file is not None:
+    # Read the uploaded file
+    html_content = uploaded_file.read().decode('utf-8')
+
+    # Text input for context ID
+    context_id = st.text_input('Enter the context ID of the div tags:', '')
+
+    # Button to trigger extraction
+    if st.button('Extract Contents'):
+        extracted_contents = extract_div_contents(html_content, context_id)
+        # Display the extracted contents
+        st.write('Extracted Contents:')
+        for content in extracted_contents:
+            st.write(content)
+
