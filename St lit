@@ -1,0 +1,48 @@
+import streamlit as st
+from bs4 import BeautifulSoup
+
+def highlight_similar_divs(html_content):
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all div tags
+    div_tags = soup.find_all('div')
+
+    # Dictionary to store div content and their corresponding colors
+    div_colors = {}
+    color_index = 0
+
+    # Loop through div tags to find similar content
+    for div_tag in div_tags:
+        content = div_tag.text
+        if content not in div_colors:
+            div_colors[content] = f'color_{color_index}'
+            color_index += 1
+
+    # Add CSS style to highlight similar content
+    style = '<style>'
+    for content, color in div_colors.items():
+        style += f'.{color} {{ background-color: yellow; }} '
+    style += '</style>'
+
+    # Add the style to the HTML content
+    soup.head.insert_after(BeautifulSoup(style, 'html.parser'))
+
+    # Return the modified HTML content
+    return soup.prettify()
+
+# Streamlit app
+st.title('Highlight Similar Div Tags in HTML')
+
+# File uploader for HTML file
+uploaded_file = st.file_uploader("Upload an HTML file", type=["html"])
+
+if uploaded_file is not None:
+    # Read the uploaded file
+    html_content = uploaded_file.read().decode('utf-8')
+
+    # Button to trigger highlighting
+    if st.button('Highlight Similar Div Tags'):
+        highlighted_html = highlight_similar_divs(html_content)
+        # Display the highlighted HTML
+        st.write(highlighted_html, unsafe_allow_html=True)
