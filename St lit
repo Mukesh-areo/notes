@@ -46,3 +46,54 @@ if uploaded_file is not None:
         highlighted_html = highlight_similar_divs(html_content)
         # Display the highlighted HTML
         st.write(highlighted_html, unsafe_allow_html=True)
+
+
+
+----------
+from bs4 import BeautifulSoup
+
+# Sample HTML content
+html_content = """
+<html>
+<head>
+<title>Sample HTML</title>
+</head>
+<body>
+<div>Content 1</div>
+<div>Content 2</div>
+<div>Content 1</div>
+<div>Content 3</div>
+<div>Content 2</div>
+<div>Content 4</div>
+</body>
+</html>
+"""
+
+# Parse the HTML content
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find all div tags
+div_tags = soup.find_all('div')
+
+# Dictionary to store div content and their corresponding colors
+div_colors = {}
+color_index = 0
+
+# Loop through div tags to find similar content
+for div_tag in div_tags:
+    content = div_tag.text
+    if content not in div_colors:
+        div_colors[content] = f'color_{color_index}'
+        color_index += 1
+
+# Add CSS style to highlight similar content
+style = '<style>'
+for content, color in div_colors.items():
+    style += f'.{color} {{ background-color: yellow; }} '
+style += '</style>'
+
+# Add the style to the HTML content
+soup.head.insert_after(BeautifulSoup(style, 'html.parser'))
+
+# Print the modified HTML content
+print(soup.prettify())
