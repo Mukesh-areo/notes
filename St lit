@@ -184,6 +184,7 @@ def highlight_similar_sentences(html_content):
     # Add the style to the HTML content
     soup.head.insert_after(BeautifulSoup(style, 'html.parser'))
 
+
     # Return the modified HTML content
     return soup.prettify()
 
@@ -204,4 +205,31 @@ if uploaded_file is not None:
         st.write(highlighted_html, unsafe_allow_html=True)
 
 
+---------_---
+
+import difflib
+
+def highlight_similar_sentences(text):
+    sentences = text.split(". ")
+    highlighted_text = ""
+    for i in range(len(sentences)):
+        for j in range(i+1, len(sentences)):
+            seq = difflib.SequenceMatcher(None, sentences[i], sentences[j])
+            if seq.ratio() > 0.8:  # Adjust the threshold as needed
+                if seq.ratio() > 0.9:
+                    color_code = "\033[1;31m"  # Red for high similarity
+                elif seq.ratio() > 0.85:
+                    color_code = "\033[1;32m"  # Green for medium similarity
+                else:
+                    color_code = "\033[1;34m"  # Blue for low similarity
+                sentences[i] = color_code + sentences[i] + "\033[0m"  # Reset color
+                sentences[j] = color_code + sentences[j] + "\033[0m"  # Reset color
+    highlighted_text = ". ".join(sentences)
+    return highlighted_text
+
+# Example string
+string = "This is a sentence. This is another sentence. This is a similar sentence. This is a word. This is another word."
+
+highlighted_string = highlight_similar_sentences(string)
+print(highlighted_string)
 
