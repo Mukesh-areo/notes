@@ -129,3 +129,57 @@ repeated_text_df = find_repeated_text(html_content, start_text)
 print(repeated_text_df)
 
 
+----------
+from bs4 import BeautifulSoup
+import pandas as pd
+
+def find_repeated_text_within_range(html_content, start_text, end_text):
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all text tags
+    text_tags = soup.find_all(text=True)
+
+    # Flag to indicate when to start recording text
+    start_recording = False
+    recorded_text = []
+
+    # Iterate over all text tags
+    for tag in text_tags:
+        # Check if the tag matches the start text
+        if tag.strip() == start_text:
+            start_recording = True
+        elif tag.strip() == end_text:
+            start_recording = False
+
+        # If recording, add the tag to the recorded text
+        if start_recording:
+            recorded_text.append(tag.strip())
+
+    # Count the occurrences of each text tag
+    tag_counts = {}
+    for tag in recorded_text:
+        if tag in tag_counts:
+            tag_counts[tag] += 1
+        else:
+            tag_counts[tag] = 1
+
+    # Create a DataFrame from the tag counts
+    df = pd.DataFrame(list(tag_counts.items()), columns=['Text', 'Count'])
+
+    # Filter out text tags that are repeated more than once
+    repeated_text_tags = df[df['Count'] > 1]
+
+    return repeated_text_tags
+
+# Example usage
+with open('your_html_file.html', 'r') as file:
+    html_content = file.read()
+
+start_text = 'Your start text here'
+end_text = 'Your end text here'
+repeated_text_df = find_repeated_text_within_range(html_content, start_text, end_text)
+
+# Print the DataFrame
+print(repeated_text_df)
+
