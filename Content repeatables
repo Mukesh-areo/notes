@@ -183,3 +183,45 @@ repeated_text_df = find_repeated_text_within_range(html_content, start_text, end
 # Print the DataFrame
 print(repeated_text_df)
 
+
+
+------
+from bs4 import BeautifulSoup
+import pandas as pd
+
+def find_repeated_text_within_div(html_content, div_name):
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find all div tags with the specified name or class
+    div_tags = soup.find_all('div', {'class': div_name})
+
+    # Extract text content from div tags
+    div_texts = [tag.get_text(strip=True) for tag in div_tags]
+
+    # Count the occurrences of each text content
+    text_counts = {}
+    for text in div_texts:
+        if text in text_counts:
+            text_counts[text] += 1
+        else:
+            text_counts[text] = 1
+
+    # Create a DataFrame from the text counts
+    df = pd.DataFrame(list(text_counts.items()), columns=['Text', 'Count'])
+
+    # Filter out text contents that are repeated more than once
+    repeated_texts = df[df['Count'] > 1]
+
+    return repeated_texts
+
+# Example usage
+with open('your_html_file.html', 'r') as file:
+    html_content = file.read()
+
+div_name = 'your_div_name_here'  # or class name
+repeated_texts_df = find_repeated_text_within_div(html_content, div_name)
+
+# Print the DataFrame
+print(repeated_texts_df)
+
