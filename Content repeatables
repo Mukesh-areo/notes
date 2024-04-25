@@ -46,3 +46,33 @@ find_repeated_text(html_content, start_text)
 
 
 ----_---
+
+
+
+from bs4 import BeautifulSoup
+
+# Read the HTML file
+with open('your_html_file.html', 'r') as file:
+    html_content = file.read()
+
+# Parse the HTML content
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find all text tags
+text_tags = soup.find_all(text=True)
+
+# Count the occurrences of each text tag
+tag_counts = {}
+for tag in text_tags:
+    if tag in tag_counts:
+        tag_counts[tag] += 1
+    else:
+        tag_counts[tag] = 1
+
+# Filter out text tags that are repeated more than once
+repeated_text_tags = {tag: count for tag, count in tag_counts.items() if count > 1}
+
+# Print the repeated text tags and their counts
+for tag, count in repeated_text_tags.items():
+    print(f'Text: {tag.strip()} | Count: {count}')
+
