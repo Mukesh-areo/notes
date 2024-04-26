@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+jifrom bs4 import BeautifulSoup
 
 # Assuming 'html_content' contains your HTML content
 html_content = """
@@ -80,4 +80,45 @@ for div in main_divs:
 # Print the contents
 for idx, content in enumerate(contents_lists):
     print(f"Content for div {idx + 1}: {content}")
+--------
+
+
+
+
+
+
+
+from bs4 import BeautifulSoup
+
+# Assuming `html_content` contains your HTML content
+html_content = """
+<html>
+<head>
+</head>
+<body>
+    <div>Content 1</div>
+    <div>Content 2</div>
+    <p>Some other content</p>
+    <div>Content 3</div>
+</body>
+</html>
+"""
+
+# Parse the HTML
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find the <body> tag
+body_tag = soup.find('body')
+
+# Find all <div> tags inside the <body> tag
+div_tags = body_tag.find_all('div')
+
+# Store content of each <div> in a dictionary
+div_content_dict = {}
+for i, div_tag in enumerate(div_tags, start=1):
+    div_content_dict[f"div_{i}"] = div_tag.text
+
+# Print the dictionary
+print(div_content_dict)
+
 
