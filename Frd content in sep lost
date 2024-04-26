@@ -1,3 +1,4 @@
+up
 jijifrom bs4 import BeautifulSoup
 
 # Assuming 'html_content' contains your HTML content
@@ -260,4 +261,53 @@ matches = re.findall(pattern, html_content, flags=re.DOTALL)
 for match in matches:
     print(match.strip())
 
+
+------_----
+
+import streamlit as st
+from bs4 import BeautifulSoup
+import html2text
+
+def convert_html_to_text(html_content):
+    # Parse the HTML
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Convert the parsed HTML back to a string
+    html_string = str(soup)
+    
+    # Apply regex to split the string into a list of tags
+    tags_list = re.findall(r'<[^>]+>', html_string)
+    
+    # Initialize the HTML to text converter
+    converter = html2text.HTML2Text()
+    
+    # Convert each tag to text
+    text_list = []
+    for tag in tags_list:
+        text = converter.handle(tag)
+        text_list.append(text.strip())
+    
+    return text_list
+
+# Streamlit app
+def main():
+    st.title('HTML to Text Converter')
+    
+    # File upload
+    st.sidebar.title('Upload HTML File')
+    uploaded_file = st.sidebar.file_uploader("Choose an HTML file", type=['html'])
+    
+    if uploaded_file is not None:
+        html_content = uploaded_file.read()
+        
+        # Convert HTML to text
+        text_list = convert_html_to_text(html_content)
+        
+        # Display converted text
+        st.header('Converted Text:')
+        for i, text in enumerate(text_list, start=1):
+            st.write(f"{i}. {text}")
+
+if __name__ == '__main__':
+    main()
 
