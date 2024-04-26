@@ -121,4 +121,43 @@ for i, div_tag in enumerate(div_tags, start=1):
 # Print the dictionary
 print(div_content_dict)
 
+----++
+
+from bs4 import BeautifulSoup
+
+# Assuming `html_content` contains your HTML content
+html_content = """
+<html>
+<head>
+</head>
+<body>
+    <div>
+        <div>Content 1</div>
+        <div>Content 2</div>
+    </div>
+    <div>
+        <div>Content 3</div>
+        <div>Content 4</div>
+    </div>
+</body>
+</html>
+"""
+
+# Parse the HTML
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find the <body> tag
+body_tag = soup.find('body')
+
+# Find all <div> tags inside the <body> tag
+div_tags = body_tag.find_all('div')
+
+# Store content of each <div> in a dictionary
+div_content_dict = {}
+for i, div_tag in enumerate(div_tags, start=1):
+    div_content_dict[f"div_{i}"] = div_tag.text
+
+# Print the dictionary
+print(div_content_dict)
+
 
