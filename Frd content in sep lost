@@ -38,3 +38,46 @@ for div in main_divs:
 # Print the contents
 for div_id, content in contents.items():
     print(f"Content for div '{div_id}': {content}")
+
+
+
+---+
+from bs4 import BeautifulSoup
+
+# Assuming 'html_content' contains your HTML content
+html_content = """
+<html>
+<body>
+    <div id="main1">
+        <p>Content 1</p>
+    </div>
+    <div id="main2">
+        <p>Content 2</p>
+    </div>
+    <div id="main3">
+        <p>Content 3</p>
+    </div>
+</body>
+</html>
+"""
+
+# Parse the HTML content
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find all main divs
+main_divs = soup.find_all('div')
+
+# Create a list to store contents for each main div
+contents_lists = []
+
+# Extract and store contents in separate lists
+for div in main_divs:
+    # Get the content inside the div
+    content = div.get_text(strip=True)
+    # Append content to the list
+    contents_lists.append(content)
+
+# Print the contents
+for idx, content in enumerate(contents_lists):
+    print(f"Content for div {idx + 1}: {content}")
+
