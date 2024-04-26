@@ -1,4 +1,4 @@
-jifrom bs4 import BeautifulSoup
+jijifrom bs4 import BeautifulSoup
 
 # Assuming 'html_content' contains your HTML content
 html_content = """
@@ -159,5 +159,54 @@ for i, div_tag in enumerate(div_tags, start=1):
 
 # Print the dictionary
 print(div_content_dict)
+
+-------
+
+
+
+
+from bs4 import BeautifulSoup
+
+# Example HTML content with different <div> structures
+html_content = """
+<html>
+<head>
+</head>
+<body>
+    <div>
+        <div>Content 1</div>
+        <div>Content 2</div>
+    </div>
+    <div>
+        <div>Content 3</div>
+        <div>Content 4</div>
+    </div>
+    <div>
+        <div>
+            <div>Content 5</div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+# Parse the HTML
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Find all <div> tags inside the <body> tag
+div_tags = soup.find_all('div')
+
+# Store content of each <div> in a list
+div_content_list = []
+for div_tag in div_tags:
+    nested_divs = div_tag.find_all('div')
+    if len(nested_divs) > 1:
+        div_content_list.append(str(div_tag))
+    else:
+        div_content_list.append(div_tag.text)
+
+# Print the list
+for i, content in enumerate(div_content_list, start=1):
+    print(f"Content {i}: {content}")
 
 
