@@ -230,3 +230,34 @@ text_strings = [converter.handle(html_string) for html_string in html_strings]
 for text_string in text_strings:
     print(text_string.strip())
 
+
+
+------
+import re
+
+# Example HTML content with nested <div> tags
+html_content = """
+<div>
+    <div>Content 1</div>
+    <div>Content 2</div>
+    <div>
+        <div>Content 3</div>
+        <div>Content 4</div>
+    </div>
+</div>
+<div>
+    <div>Content 5</div>
+</div>
+"""
+
+# Define the regex pattern to match nested <div> tags
+pattern = r'<div>((?:<(?!/div>)[^>]*>|(?R))*)</div>'
+
+# Find all matches
+matches = re.findall(pattern, html_content, flags=re.DOTALL)
+
+# Print the matches
+for match in matches:
+    print(match.strip())
+
+
