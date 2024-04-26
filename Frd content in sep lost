@@ -210,3 +210,23 @@ for i, content in enumerate(div_content_list, start=1):
     print(f"Content {i}: {content}")
 
 
+
+
+import html2text
+
+# Example list of strings containing HTML code
+html_strings = [
+    '<div><div>Content 1</div><div>Content 2</div></div>',
+    '<div><div>Content 3</div><div>Content 4</div></div>'
+]
+
+# Initialize the HTML to text converter
+converter = html2text.HTML2Text()
+
+# Convert each HTML string to text
+text_strings = [converter.handle(html_string) for html_string in html_strings]
+
+# Print the converted text strings
+for text_string in text_strings:
+    print(text_string.strip())
+
