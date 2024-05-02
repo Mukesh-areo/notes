@@ -1,0 +1,47 @@
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import re
+
+# Example HTML content
+html_content = """
+<div>
+    <div>
+        <div>
+            The application downloads files from http://techslides.com and http://download.blender.org. If these domains are not accessible it will not work.
+            You can change the source location of files to download by changing the contents of url1 and url2 variables in main.js file.
+            <p>A model trained for text generation can be later adapted to follow instructions. One of the most used open-source models for instruction is OpenAssistant, which you can try <a href="https://huggingface.co/chat">at Hugging Chat</a>.</p>
+        </div>
+    </div>
+</div>
+"""
+
+# Example list of contents
+contents = [
+    "The application downloads files from http://techslides.com and http://download.blender.org. If these domains are not accessible it will not work. You can change the source location of files to download by changing the contents of url1 and url2 variables in main.js file.",
+    "A model trained for text generation can be later adapted to follow instructions. One of the most used open-source models for instruction is OpenAssistant, which you can try at Hugging Chat."
+]
+
+# Create a TF-IDF vectorizer
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(contents)
+
+# Calculate cosine similarity between each pair of contents
+similarities = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# Find and highlight the main div surrounding the matching content in the HTML
+for i in range(len(contents)):
+    for j in range(i+1, len(contents)):
+        similarity = similarities[i][j]
+        if similarity > 0.95:
+            pattern = re.compile(rf'<div>\s*{re.escape(contents[i])}|{re.escape(contents[j])}\s*</div>', re.DOTALL)
+            html_content = re.sub(pattern, rf'<div style="background-color: yellow;">\g<0></div>', html_content)
+        elif similarity > 0.90:
+            pattern = re.compile(rf'<div>\s*{re.escape(contents[i])}|{re.escape(contents[j])}\s*</div>', re.DOTALL)
+            html_content = re.sub(pattern, rf'<div style="background-color: orange;">\g<0></div>', html_content)
+        elif similarity > 0.80:
+            pattern = re.compile(rf'<div>\s*{re.escape(contents[i])}|{re.escape(contents[j])}\s*</div>', re.DOTALL)
+            html_content = re.sub(pattern, rf'<div style="background-color: lightblue;">\g<0></div>', html_content)
+
+# Save the modified HTML to a new file
+with open('highlighted_content.html', 'w', encoding='utf-8') as file:
+    file.write(html_content)
