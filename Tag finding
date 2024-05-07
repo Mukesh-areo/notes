@@ -1,0 +1,31 @@
+from bs4 import BeautifulSoup
+import re
+
+# Example list of text content
+list_of_text_content = ["Text content 1", "Text content 2", "Text content 3"]
+
+# Example HTML content
+html_content = """
+<html>
+<head><title>Test</title></head>
+<body>
+<p>This is Text content 1.</p>
+<p>This is some other text.</p>
+<p>Text content 3 is here.</p>
+</body>
+</html>
+"""
+
+# Extract text from HTML
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Check if each text in the list is present in the HTML
+for text in list_of_text_content:
+    # Find all tags containing the text
+    tags = soup.find_all(text=re.compile(re.escape(text), re.IGNORECASE))
+    if tags:
+        for tag in tags:
+            # Print the tag along with its parent tags
+            print(tag.find_parents()[0])
+    else:
+        print(f"Text '{text}' not found in HTML.")
