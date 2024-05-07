@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+infrom bs4 import BeautifulSoup
 import re
 
 # Example list of text content
@@ -101,6 +101,60 @@ for file_name in html_files:
                 new_tag = soup.new_tag("span", style="background-color: yellow;")
                 new_tag.string = tag
                 tag.replace_with(new_tag)
+    
+    # Write the modified HTML back to the file
+    with open(file_path, "w") as file:
+        file.write(str(soup))
+
+
+
+import os
+from bs4 import BeautifulSoup
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Example list of text content
+list_of_text_content = ["Text content 1", "Text content 2", "Text content 3"]
+
+# Path to the folder containing HTML files
+folder_path = "/path/to/folder"
+
+# List all files in the folder
+html_files = [f for f in os.listdir(folder_path) if f.endswith(".html")]
+
+# Process each HTML file
+for file_name in html_files:
+    file_path = os.path.join(folder_path, file_name)
+    with open(file_path, "r") as file:
+        html_content = file.read()
+    
+    # Extract text from HTML
+    soup = BeautifulSoup(html_content, "html.parser")
+    html_text = soup.get_text()
+    
+    # Calculate TF-IDF matrix for the HTML text
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform([html_text])
+    
+    # Process each text in the list
+    for text in list_of_text_content:
+        # Calculate TF-IDF matrix for the text
+        text_tfidf = vectorizer.transform([text])
+        
+        # Calculate cosine similarity between text and HTML
+        similarity = cosine_similarity(text_tfidf, tfidf_matrix)[0]
+        
+        # Find indices where similarity is above threshold (e.g., 0.9)
+        indices = [i for i, sim in enumerate(similarity) if sim > 0.9]
+        
+        # Highlight matched text in the HTML
+        for index in indices:
+            start_idx = html_text.find(text, index)
+            end_idx = start_idx + len(text)
+            new_tag = soup.new_tag("span", style="background-color: yellow;")
+            new_tag.string = html_text[start_idx:end_idx]
+            soup.find("body").insert(start_idx, new_tag)
     
     # Write the modified HTML back to the file
     with open(file_path, "w") as file:
