@@ -66,3 +66,43 @@ for file_name in html_files:
                 print(f"File: {file_name}, Tag: {tag.find_parents()[0]}")
         else:
             print(f"File: {file_name}, Text '{text}' not found in HTML.")
+
+
+
+import os
+from bs4 import BeautifulSoup
+import re
+
+# Example list of text content
+list_of_text_content = ["Text content 1", "Text content 2", "Text content 3"]
+
+# Path to the folder containing HTML files
+folder_path = "/path/to/folder"
+
+# List all files in the folder
+html_files = [f for f in os.listdir(folder_path) if f.endswith(".html")]
+
+# Process each HTML file
+for file_name in html_files:
+    file_path = os.path.join(folder_path, file_name)
+    with open(file_path, "r") as file:
+        html_content = file.read()
+    
+    # Extract text from HTML
+    soup = BeautifulSoup(html_content, "html.parser")
+    
+    # Check if each text in the list is present in the HTML
+    for text in list_of_text_content:
+        # Find all tags containing the text
+        tags = soup.find_all(text=re.compile(re.escape(text), re.IGNORECASE))
+        if tags:
+            for tag in tags:
+                # Highlight the text by wrapping it in a span tag with a class for styling
+                new_tag = soup.new_tag("span", style="background-color: yellow;")
+                new_tag.string = tag
+                tag.replace_with(new_tag)
+    
+    # Write the modified HTML back to the file
+    with open(file_path, "w") as file:
+        file.write(str(soup))
+
