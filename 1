@@ -92,3 +92,53 @@ compare_and_replace_tags(soup1, soup2)
 with open('file2_modified.html', 'w') as file:
     file.write(str(soup2))
 
+
+
+
+from bs4 import BeautifulSoup
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Parse HTML files
+def parse_html(file_path):
+    with open(file_path, 'r') as file:
+        soup = BeautifulSoup(file, 'html.parser')
+    return soup
+
+file1_path = 'file1.html'
+file2_path = 'file2.html'
+
+soup1 = parse_html(file1_path)
+soup2 = parse_html(file2_path)
+
+# Extract text from tags in soup1
+content1 = [tag.get_text(strip=True) for tag in soup1.find_all(['p', 'div'])]
+
+# Create CountVectorizer
+vectorizer = CountVectorizer()
+
+# Iterate over tags in soup2 and tag based on context from soup1
+for tag2 in soup2.find_all(['p', 'div']):  # Add more tags as needed
+    content2 = tag2.get_text(strip=True)
+    
+    # Calculate cosine similarity between content2 and each tag in soup1
+    max_similarity = 0
+    for tag1_text in content1:
+        # Calculate cosine similarity
+        vectorizer.fit_transform([content2, tag1_text])
+        cosine_sim = cosine_similarity(vectorizer.transform([content2]), vectorizer.transform([tag1_text]))[0][0]
+        if cosine_sim > max_similarity:
+            max_similarity = cosine_sim
+            tag1_max = tag1_text
+
+    # If the maximum similarity is above threshold, tag the content in soup2
+    if max_similarity >= 0.9:
+        new_tag = soup2.new_tag(tag1.name)
+        new_tag.string = tag1_max
+        tag2.replace_with(new_tag)
+
+# Save modified HTML file
+with open('file2_modified.html', 'w') as file:
+    file.write(str(soup2))
+
+
