@@ -52,3 +52,43 @@ compare_and_replace_tags(soup1, soup2)
 # Save modified HTML file
 with open('file2_modified.html', 'w') as file:
     file.write(str(soup2))
+
+
+
+
+    from bs4 import BeautifulSoup
+from difflib import SequenceMatcher
+
+# Parse HTML files
+def parse_html(file_path):
+    with open(file_path, 'r') as file:
+        soup = BeautifulSoup(file, 'html.parser')
+    return soup
+
+file1_path = 'file1.html'
+file2_path = 'file2.html'
+
+soup1 = parse_html(file1_path)
+soup2 = parse_html(file2_path)
+
+# Compare and replace tags
+def compare_and_replace_tags(soup1, soup2):
+    for tag1 in soup1.find_all(['p', 'div']):  # Add more tags as needed
+        content1 = tag1.get_text(strip=True)
+
+        for tag2 in soup2.find_all(['p', 'div']):  # Add more tags as needed
+            content2 = tag2.get_text(strip=True)
+
+            similarity_ratio = SequenceMatcher(None, content1, content2).ratio()
+            if similarity_ratio >= 0.9:
+                new_tag = soup2.new_tag(tag1.name)
+                new_tag.string = content2
+                tag2.replace_with(new_tag)
+                break  # Move to the next tag in file1
+
+compare_and_replace_tags(soup1, soup2)
+
+# Save modified HTML file
+with open('file2_modified.html', 'w') as file:
+    file.write(str(soup2))
+
