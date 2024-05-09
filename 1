@@ -1,144 +1,39 @@
-from bs4 import BeautifulSoup
-
-# Read the HTML file
-with open('your_file.html', 'r', encoding='utf-8') as file:
-    html_content = file.read()
-
-# Parse the HTML content
-soup = BeautifulSoup(html_content, 'html.parser')
-
-# Find all divs with class 'main'
-main_divs = soup.find_all('div', class_='main')
-
-# Extract text from main_divs and store in a list
-content_list = []
-for div in main_divs:
-    content_list.append(div.get_text())
-
-# Print or use the content_list as needed
-print(content_list)
-
-
-from bs4 import BeautifulSoup
-from difflib import SequenceMatcher
-
-# Parse HTML files
-def parse_html(file_path):
-    with open(file_path, 'r') as file:
-        soup = BeautifulSoup(file, 'html.parser')
-    return soup
-
-file1_path = 'file1.html'
-file2_path = 'file2.html'
-
-soup1 = parse_html(file1_path)
-soup2 = parse_html(file2_path)
-
-# Compare and replace tags
-def compare_and_replace_tags(soup1, soup2):
-    for tag1 in soup1.find_all(['p', 'div']):  # Add more tags as needed
-        content1 = tag1.get_text(strip=True)
-
-        for tag2 in soup2.find_all(['p', 'div']):  # Add more tags as needed
-            content2 = tag2.get_text(strip=True)
-
-            similarity_ratio = SequenceMatcher(None, content1, content2).ratio()
-            if similarity_ratio >= 0.9:
-                tag2.replace_with(tag1)
-                break  # Move to the next tag in file1
-
-compare_and_replace_tags(soup1, soup2)
-
-# Save modified HTML file
-with open('file2_modified.html', 'w') as file:
-    file.write(str(soup2))
-
-
-
-
-    from bs4 import BeautifulSoup
-from difflib import SequenceMatcher
-
-# Parse HTML files
-def parse_html(file_path):
-    with open(file_path, 'r') as file:
-        soup = BeautifulSoup(file, 'html.parser')
-    return soup
-
-file1_path = 'file1.html'
-file2_path = 'file2.html'
-
-soup1 = parse_html(file1_path)
-soup2 = parse_html(file2_path)
-
-# Compare and replace tags
-def compare_and_replace_tags(soup1, soup2):
-    for tag1 in soup1.find_all(['p', 'div']):  # Add more tags as needed
-        content1 = tag1.get_text(strip=True)
-
-        for tag2 in soup2.find_all(['p', 'div']):  # Add more tags as needed
-            content2 = tag2.get_text(strip=True)
-
-            similarity_ratio = SequenceMatcher(None, content1, content2).ratio()
-            if similarity_ratio >= 0.9:
-                new_tag = soup2.new_tag(tag1.name)
-                new_tag.string = content2
-                tag2.replace_with(new_tag)
-                break  # Move to the next tag in file1
-
-compare_and_replace_tags(soup1, soup2)
-
-# Save modified HTML file
-with open('file2_modified.html', 'w') as file:
-    file.write(str(soup2))
-
-
-
-
-from bs4 import BeautifulSoup
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from bs4 import BeautifulSoup
 
-# Parse HTML files
-def parse_html(file_path):
-    with open(file_path, 'r') as file:
-        soup = BeautifulSoup(file, 'html.parser')
-    return soup
+existing_dict = {
+    '1 - Downloaded file lists\n2 - Start download - small file\n3 - Start download - large file\nPause - Pause download\nPlay - Resume download\nStop - Cancel download\n0 - Clear logs': '<ix:nonnumeric context="c1" continuedat="cont1" escape="false" id="f1" name="eg:DescriptionOfPolicy">',
+    'Info\nThis application demonstrates the usage of Tizen download API\nThe application downloads files from\nhttp://techslides.com\nand\nhttp://download.blender.org\n. If these domains are not accessible it will not work.\nInfo\nYou can change the source location of files to download\nby changing the contents of\nurl1\nand\nurl2\nvariables in\nmain.js\nfile': '<ix:nonnumeric context="c1" continuedat="cont1" escape="false" id="f1" name="eg:DescriptionOfPolicy">',
+    'Info\nYou can change the source location of files to download': '<ix:nonnumeric context="c1" continuedat="cont1" escape="false" id="f1" name="eg:sample">'
+}
 
-file1_path = 'file1.html'
-file2_path = 'file2.html'
+# Function to calculate cosine similarity
+def calculate_similarity(text1, text2):
+    vectorizer = CountVectorizer().fit_transform([text1, text2])
+    vectors = vectorizer.toarray()
+    return cosine_similarity(vectors)[0, 1]
 
-soup1 = parse_html(file1_path)
-soup2 = parse_html(file2_path)
+# Function to tag text based on contextual similarity
+def tag_text(html_content, existing_dict):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    for tag in soup.find_all(text=True):
+        for key, value in existing_dict.items():
+            similarity = calculate_similarity(tag, key)
+            if similarity >= 0.9:
+                tag.replace_with(f'{value}{tag}{value}')
+    return soup.prettify()
 
-# Extract text from tags in soup1
-content1 = [tag.get_text(strip=True) for tag in soup1.find_all(['p', 'div'])]
+# Example usage
+html_content = """
+<html>
+<body>
+<p>1 - Downloaded file lists</p>
+<p>Info</p>
+<p>This application demonstrates the usage of Tizen download API</p>
+</body>
+</html>
+"""
 
-# Create CountVectorizer
-vectorizer = CountVectorizer()
-
-# Iterate over tags in soup2 and tag based on context from soup1
-for tag2 in soup2.find_all(['p', 'div']):  # Add more tags as needed
-    content2 = tag2.get_text(strip=True)
-    
-    # Calculate cosine similarity between content2 and each tag in soup1
-    max_similarity = 0
-    for tag1_text in content1:
-        # Calculate cosine similarity
-        vectorizer.fit_transform([content2, tag1_text])
-        cosine_sim = cosine_similarity(vectorizer.transform([content2]), vectorizer.transform([tag1_text]))[0][0]
-        if cosine_sim > max_similarity:
-            max_similarity = cosine_sim
-            tag1_max = tag1_text
-
-    # If the maximum similarity is above threshold, tag the content in soup2
-    if max_similarity >= 0.9:
-        new_tag = soup2.new_tag(tag1.name)
-        new_tag.string = tag1_max
-        tag2.replace_with(new_tag)
-
-# Save modified HTML file
-with open('file2_modified.html', 'w') as file:
-    file.write(str(soup2))
-
-
+tagged_content = tag_text(html_content, existing_dict)
+print(tagged_content)
