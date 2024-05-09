@@ -37,3 +37,37 @@ html_content = """
 
 tagged_content = tag_text(html_content, existing_dict)
 print(tagged_content)
+
+
+
+from bs4 import BeautifulSoup
+
+html_content = """
+<html>
+<body>
+<p>1 - Downloaded file lists</p>
+<p>Info</p>
+<p>This application demonstrates the usage of Tizen download API</p>
+</body>
+</html>
+"""
+
+# Parse the HTML content
+soup = BeautifulSoup(html_content, 'html.parser')
+
+# Define the text content and attributes for the ix:nonNumeric tag
+text_to_tag = "This application demonstrates the usage of Tizen download API"
+attributes = {'some_attribute': 'some_value', 'another_attribute': 'another_value'}
+
+# Find the paragraph containing the text to tag
+paragraph_to_tag = soup.find('p', text=text_to_tag)
+
+# Create the new ix:nonNumeric tag
+tag = soup.new_tag('ix:nonNumeric', **attributes)
+tag.string = text_to_tag
+
+# Replace the paragraph containing the text with the new ix:nonNumeric tag
+paragraph_to_tag.replace_with(tag)
+
+# Print the modified HTML content
+print(soup.prettify())
