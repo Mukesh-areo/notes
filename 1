@@ -71,3 +71,30 @@ paragraph_to_tag.replace_with(tag)
 
 # Print the modified HTML content
 print(soup.prettify())
+
+
+
+
+
+
+
+# Sample dictionary
+sentence_dict = {
+    "key1": "This is a sample sentence for testing purposes",
+    "key2": "Another example sentence to demonstrate the process"
+}
+
+# Sample list of strings
+sentence_list = [
+    "This is a different sentence that doesn't match the dictionary",
+    "A sample sentence for testing purposes",
+    "Another example sentence to demonstrate something else"
+]
+
+# Extract first five and last five words from each key's string value
+extracted_parts = {key: {'first': value.split()[:5], 'last': value.split()[-5:]} for key, value in sentence_dict.items()}
+
+# Fetch the whole sentences from the list based on the extracted parts
+matching_sentences = {key: [sentence for sentence in sentence_list if extracted_parts[key]['first'] == sentence.split()[:5] and extracted_parts[key]['last'] == sentence.split()[-5:]] for key in extracted_parts}
+
+print(matching_sentences)
