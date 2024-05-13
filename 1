@@ -98,3 +98,67 @@ extracted_parts = {key: {'first': value.split()[:5], 'last': value.split()[-5:]}
 matching_sentences = {key: [sentence for sentence in sentence_list if extracted_parts[key]['first'] == sentence.split()[:5] and extracted_parts[key]['last'] == sentence.split()[-5:]] for key in extracted_parts}
 
 print(matching_sentences)
+
+
+
+
+
+
+from bs4 import BeautifulSoup
+import re
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Function to extract text content from HTML document
+def extract_text_from_html(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    text = ' '.join([tag.get_text() for tag in soup.find_all()])
+    return text
+
+# Function to preprocess text
+def preprocess_text(text):
+    # Remove non-alphanumeric characters
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    # Convert to lowercase
+    text = text.lower()
+    return text
+
+# Function to compare two HTML documents based on text content
+def compare_html_documents(html_doc1, html_doc2):
+    # Extract text content from HTML documents
+    text1 = extract_text_from_html(html_doc1)
+    text2 = extract_text_from_html(html_doc2)
+
+    # Preprocess text
+    text1 = preprocess_text(text1)
+    text2 = preprocess_text(text2)
+
+    # Calculate cosine similarity
+    vectorizer = CountVectorizer().fit_transform([text1, text2])
+    similarity = cosine_similarity(vectorizer)[0, 1]
+
+    return similarity
+
+# Sample HTML documents
+html_doc1 = """
+<html>
+<head><title>Document 1</title></head>
+<body>
+<p>This is document 1.</p>
+</body>
+</html>
+"""
+
+html_doc2 = """
+<html>
+<head><title>Document 2</title></head>
+<body>
+<p>This is document 2.</p>
+</body>
+</html>
+"""
+
+# Compare the two HTML documents
+similarity_score = compare_html_documents(html_doc1, html_doc2)
+print("Similarity score:", similarity_score)
+
