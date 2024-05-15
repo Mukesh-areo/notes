@@ -162,3 +162,36 @@ html_doc2 = """
 similarity_score = compare_html_documents(html_doc1, html_doc2)
 print("Similarity score:", similarity_score)
 
+
+
+
+from bs4 import BeautifulSoup
+
+# Example HTML contents
+html_content1 = """
+<c>
+<div><p>Text 1</p></div>
+<div><p>Text 2</p></div>
+</c>
+"""
+html_content2 = """
+<div><p>Text 2</p></div>
+<div><p>Text 1</p></div>
+"""
+
+# Parse HTML contents
+soup1 = BeautifulSoup(html_content1, "html.parser")
+soup2 = BeautifulSoup(html_content2, "html.parser")
+
+# Find the custom <c> tag in soup1
+custom_tag = soup1.find("c")
+
+# Iterate over tags in both contents
+for tag1, tag2 in zip(custom_tag.find_all(), soup2.find_all()):
+    # Compare tags
+    if tag1.name == tag2.name:
+        # Replace tag in soup2 with custom tag if they are similar
+        tag2.replace_with(soup2.new_tag("c", text=tag2.text))
+
+# Print modified content
+print(soup2.prettify())
