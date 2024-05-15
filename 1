@@ -227,3 +227,23 @@ for tag in all_tags:
 
 # sections will contain a list of lists, where each inner list contains tags between <C tag_id=6> and <C tag_id=67>
 
+
+
+all_tags = soup.find_all(True)
+
+# Initialize variables
+tag6_found = False
+tag67_found = False
+tags_between = []
+
+for tag in all_tags:
+    if not tag6_found and tag.name == 'c' and tag.get('tag_id') == '6':
+        tag6_found = True
+    elif tag6_found and not tag67_found:
+        tags_between.append(tag)
+        if tag.name == 'c' and tag.get('tag_id') == '67':
+            tag67_found = True
+            break
+
+# tags_between will contain all tags between <C tag_id=6> and <C tag_id=67>
+
