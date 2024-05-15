@@ -165,6 +165,8 @@ print("Similarity score:", similarity_score)
 
 
 
+
+
 from bs4 import BeautifulSoup
 
 # Example HTML contents
@@ -195,3 +197,33 @@ for tag1, tag2 in zip(custom_tag.find_all(), soup2.find_all()):
 
 # Print modified content
 print(soup2.prettify())
+
+
+
+
+
+
+
+
+
+
+all_tags = soup.find_all(True)
+
+# Initialize variables
+sections = []
+current_section = []
+tag6_found = False
+
+for tag in all_tags:
+    if not tag6_found and tag.name == 'c' and tag.get('tag_id') == '6':
+        tag6_found = True
+    elif tag6_found:
+        if tag.name == 'c' and tag.get('tag_id') == '67':
+            sections.append(current_section)
+            current_section = []
+            tag6_found = False
+        else:
+            current_section.append(tag)
+
+# sections will contain a list of lists, where each inner list contains tags between <C tag_id=6> and <C tag_id=67>
+
