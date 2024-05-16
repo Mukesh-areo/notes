@@ -247,3 +247,56 @@ for tag in all_tags:
 
 # tags_between will contain all tags between <C tag_id=6> and <C tag_id=67>
 
+
+
+
+
+
+
+
+from bs4 import BeautifulSoup
+
+# Assuming `tags_list` contains the list of lists of tags extracted from the first HTML file
+
+# Parse the second HTML file
+with open('second_file.html', 'r') as file:
+    html_content = file.read()
+
+soup2 = BeautifulSoup(html_content, 'html.parser')
+
+# Find all tags in the second HTML file
+all_tags2 = soup2.find_all(True)
+
+# Initialize variables to keep track of the matching structures
+matching_structures = []
+unmatched_structures = []
+
+# Iterate over each list of tags in the first list
+for group in tags_list:
+    matched = False
+    # Iterate over all tags in the second HTML file
+    for tag2 in all_tags2:
+        # Check if the current group matches the group from the first list
+        if group == [tag2 for tag2 in all_tags2[all_tags2.index(tag2):all_tags2.index(tag2)+len(group)]]:
+            matching_structures.append(group)
+            matched = True
+            break
+    if not matched:
+        unmatched_structures.append(group)
+
+if matching_structures:
+    # Reconstruct the HTML with the added <c> tags around the matched structures
+    for matching_structure in matching_structures:
+        first_tag = matching_structure[0]
+        last_tag = matching_structure[-1]
+        new_tag_start = soup2.new_tag('c')
+        new_tag_end = soup2.new_tag('c')
+        first_tag.insert_before(new_tag_start)
+        last_tag.insert_after(new_tag_end)
+
+    # Save the modified HTML file
+    with open('modified_file.html', 'w') as file:
+        file.write(str(soup2))
+else:
+    print("No matching structures found.")
+
