@@ -333,6 +333,72 @@ for group in tags_list:
         current_structure = all_tags2[i:i + len(group)]
         if all(tags_equal(tag1, tag2) for tag1, tag2 in zip(group, current_structure)):
             matching_structures.append(group)
+            
+            matched = True
+
+
+
+            tag2.name
+            break
+    if not matched:
+        unmatched_structures.append(group)
+
+
+
+
+        
+
+if matching_structures:
+    # Reconstruct the HTML with the added <c> tags around the matched structures
+    for matching_structure in matching_structures:
+        first_tag = matching_structure[0]
+        last_tag = matching_structure[-1]
+        new_tag_start = soup2.new_tag('c')
+        new_tag_end = soup2.new_tag('/c')
+        first_tag.insert_before(new_tag_start)
+        last_tag.insert_after(new_tag_end)
+
+    # Save the modified HTML file
+    with open('modified_file.html', 'w') as file:
+        file.write(str(soup2))
+else:
+    print("No matching structures found.")
+
+
+
+
+
+
+from bs4 import BeautifulSoup
+
+# Assuming `tags_list` contains the list of lists of tags extracted from the first HTML file
+
+# Parse the second HTML file
+with open('second_file.html', 'r') as file:
+    html_content = file.read()
+
+soup2 = BeautifulSoup(html_content, 'html.parser')
+
+# Find all tags in the second HTML file
+all_tags2 = soup2.find_all(True)
+
+# Initialize variables to keep track of the matching structures
+matching_structures = []
+unmatched_structures = []
+
+# Function to check if two tags are equal based on content
+def tags_equal_content(tag1, tag2):
+    return tag1.name == tag2.name and tag1.attrs == tag2.attrs and tag1.text.strip() == tag2.text.strip()
+
+# Iterate over each list of tags in the first list
+for group in tags_list:
+    first_tag, last_tag = group[0], group[-1]
+    matched = False
+    # Iterate over all tags in the second HTML file
+    for tag2 in all_tags2:
+        # Check if the first and last tags in the group match the tags in the HTML file based on content
+        if tags_equal_content(first_tag, tag2) and tags_equal_content(last_tag, all_tags2[all_tags2.index(tag2)+len(group)-1]):
+            matching_structures.append(group)
             matched = True
             break
     if not matched:
