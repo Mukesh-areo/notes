@@ -477,3 +477,55 @@ if matching_structures:
 else:
     print("No matching structures found.")
 
+
+
+
+
+
+
+# Function to calculate cosine similarity
+def calculate_similarity(text1, text2):
+    vectorizer = CountVectorizer().fit_transform([text1, text2])
+    vectors = vectorizer.toarray()
+    return cosine_similarity(vectors)[0, 1]
+
+# Parse the second HTML file
+with open("D:\\Data tracks projects\\page_1.html", 'r') as file:
+    html_content2 = file.read()
+
+soup2 = BeautifulSoup(html_content2, "html.parser")
+all_tags = soup2.find_all(True)
+
+# Calculate similarity for the first and last tags in each list in the nested list with each tag in the second HTML file
+for tags in tags_list:
+    if len(tags) > 0:
+        first_tag = tags[0]
+        last_tag = tags[-1]
+        start_index = -1
+        end_index = -1
+
+        for index, tag in enumerate(all_tags):
+            tag_text = tag.get_text().strip()  # Remove extra whitespaces
+            first_tag_text = BeautifulSoup(first_tag, "html.parser").get_text().strip()  # Remove extra whitespaces
+            last_tag_text = BeautifulSoup(last_tag, "html.parser").get_text().strip()  # Remove extra whitespaces
+
+            similarity_first = calculate_similarity(first_tag_text, tag_text)
+            similarity_last = calculate_similarity(last_tag_text, tag_text)
+
+            if similarity_first >= 0.9:
+                start_index = index
+            if similarity_last >= 0.9:
+                end_index = index
+
+        # If start and end indices are found, wrap the section with <c> tags
+        if start_index != -1 and end_index != -1:
+            new_tag_start = soup2.new_tag("c", tagid="6")
+            new_tag_end = soup2.new_tag("c", tagid="7")
+
+            # Insert new_tag_start before the parent tag of the start index
+            all_tags[start_index].parent.insert_before(new_tag_start, all_tags[start_index].parent)
+
+            # Insert new_tag_end after the parent tag of the end index
+            all_tags[end_index].parent.insert_after(new_tag_end, all_tags[end_index].parent)
+
+            start_index = -1
