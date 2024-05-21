@@ -1,0 +1,80 @@
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from bs4 import BeautifulSoup
+
+# Function to calculate cosine similarity
+def calculate_similarity(text1, text2):
+    vectorizer = CountVectorizer().fit_transform([text1, text2])
+    vectors = vectorizer.toarray()
+    return cosine_similarity(vectors)[0, 1]
+
+# Function to find the common ancestor of two tags
+def find_common_ancestor(tag1, tag2):
+    ancestors1 = set(tag1.parents)
+    for ancestor in tag2.parents:
+        if ancestor in ancestors1:
+            return ancestor
+    return None
+
+# Example list of tags
+tags_list = [
+    [
+        "<p>This is a paragraph inside the first custom tag.</p>",
+        "<p>Another paragraph inside the first custom tag.</p>",
+        "<table border='1'><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr><tr><td>Data 1</td><td>Data 2</td><td>Data 3</td></tr></table>",
+    ],
+    [
+        "<p>This is a paragraph inside the second custom tag.</p>",
+        "<table border='1'><tr><th>Header A</th><th>Header B</th><th>Header C</th></tr><tr><td>Data A</td><td>Data B</td><td>Data C</td></tr></table>",
+        "<p>Another paragraph inside the second custom tag.</p>"
+    ]
+]
+
+# Parse the second HTML file
+with open("D:\\Data tracks projects\\page_1.html", 'r') as file:
+    html_content2 = file.read()
+
+soup2 = BeautifulSoup(html_content2, "html.parser")
+all_tags = [tag for tag in soup2.find_all(True) if tag.get_text().strip()]  # Filter out tags with empty text
+
+# Calculate similarity for the first and last tags in each list in the nested list with each tag in the second HTML file
+for tags in tags_list:
+    if len(tags) > 0:
+        first_tag_text = BeautifulSoup(tags[0], "html.parser").get_text().strip()
+        last_tag_text = BeautifulSoup(tags[-1], "html.parser").get_text().strip()
+        
+        start_index = -1
+        end_index = -1
+
+        if len(tags) == 1:  # Handle case where there's only one tag in the list
+            for index, tag in enumerate(all_tags):
+                tag_text = tag.get_text().strip()
+                similarity = calculate_similarity(first_tag_text, tag_text)
+                if similarity >= 0.9:
+                    start_index = end_index = index
+                    break
+        else:
+            for index, tag in enumerate(all_tags):
+                tag_text = tag.get_text().strip()
+                if start_index == -1:  # Find the first tag similarity
+                    similarity_first = calculate_similarity(first_tag_text, tag_text)
+                    if similarity_first >= 0.9:
+                        start_index = index
+                similarity_last = calculate_similarity(last_tag_text, tag_text)
+                if similarity_last >= 0.9:  # Update the last tag similarity
+                    end_index = index
+
+        # If start and end indices are found, wrap the section with <c> tags
+        if start_index != -1 and end_index != -1:
+            start_tag = all_tags[start_index]
+            end_tag = all_tags[end_index]
+            common_ancestor = find_common_ancestor(start_tag, end_tag)
+
+            if common_ancestor is not None:
+                new_tag_start = soup2.new_tag("c", tagid="6")
+                new_tag_end = soup2.new_tag("c", tagid="7")
+                common_ancestor.insert_before(new_tag_start)
+                common_ancestor.insert_after(new_tag_end)
+
+# Print the modified HTML
+print(soup2.prettify())
