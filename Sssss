@@ -1,0 +1,120 @@
+from bs4 import BeautifulSoup
+
+# Function to calculate similarity
+def calculate_similarity(text1, text2):
+    # Placeholder similarity function. Replace with actual similarity calculation logic.
+    return 1.0 if text1 == text2 else 0.0
+
+# Example list of tags
+tags_list = [
+    [
+        "<p>This is a paragraph inside the first custom tag.</p>",
+        "<p>Another paragraph inside the first custom tag.</p>",
+        "<table border='1'><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr><tr><td>Data 1</td><td>Data 2</td><td>Data 3</td></tr></table>",
+    ],
+    [
+        "<p>This is a paragraph inside the second custom tag.</p>",
+        "<table border='1'><tr><th>Header A</th><th>Header B</th><th>Header C</th></tr><tr><td>Data A</td><td>Data B</td><td>Data C</td></tr></table>",
+        "<p>Another paragraph inside the second custom tag.</p>"
+    ],
+    ["<p>cretative worke paragraph on the permu custom tag.</p>"]
+]
+
+# Read the second HTML file
+html_content2 = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Custom Tag Example</title>
+</head>
+<body>
+<h1>Custom Tag Example</h1>
+<p>This is a paragraph inside the second custom tag.</p>
+<table border="1">
+<tr>
+<th>Header A</th>
+<th>Header B</th>
+<th>Header C</th>
+</tr>
+<tr>
+<td>Data A</td>
+<td>Data B</td>
+<td>Data C</td>
+</tr>
+</table>
+<p>Another paragraph inside the second custom tag.</p>
+<p>This is a paragraph inside the first custom the tag.</p>
+<table border="1">
+<tr>
+<th>Header 1</th>
+<th>Header 2</th>
+<th>Header 3</th></tr>
+<tr><td>Data 1</td><td>Data 2</td><td>Data 3</td></tr></table>
+<p>Another paragraph inside the first custom tag.</p>
+<p>cretative worke paragraph on  the permu custom tag.</p>
+<p>This is a paragraph inside the second custom tag.</p>
+<table border="1">
+<tr><th>Header A</th><th>Header B</th><th>Header C</th></tr>
+<tr><td>Data A</td><td>Data B</td><td>Data C</td></tr>
+</table>
+<p>Another paragraph inside the second custom tag.</p>
+<p>cretative worke paragraph on  the permu custom tag.</p>
+</body>
+</html>
+"""
+
+soup2 = BeautifulSoup(html_content2, "html.parser")
+all_tags = soup2.find_all(True)
+
+# Function to wrap matching sections with <c> tags
+def wrap_matching_sections(tags_list, all_tags, soup2):
+    for tags in tags_list:
+        if len(tags) > 1:  # Only handling multiple tags case
+            first_tag_text = BeautifulSoup(tags[0], "html.parser").get_text().strip()
+            last_tag_text = BeautifulSoup(tags[-1], "html.parser").get_text().strip()
+
+            start_indices = []
+            end_indices = []
+
+            for index, tag in enumerate(all_tags):
+                tag_text = tag.get_text().strip()
+                if calculate_similarity(first_tag_text, tag_text) >= 0.9:
+                    start_indices.append(index)
+                if calculate_similarity(last_tag_text, tag_text) >= 0.9:
+                    end_indices.append(index)
+
+            # Function to get the largest index in contiguous groups
+            def get_largest_contiguous_indices(indices):
+                if not indices:
+                    return []
+                indices.sort()
+                groups = [[indices[0]]]
+
+                for idx in indices[1:]:
+                    if idx - groups[-1][-1] == 1:
+                        groups[-1].append(idx)
+                    else:
+                        groups.append([idx])
+                
+                largest_indices = [max(group) for group in groups]
+                return largest_indices
+
+            largest_start_indices = get_largest_contiguous_indices(start_indices)
+            largest_end_indices = get_largest_contiguous_indices(end_indices)
+
+            # If a valid section is found, wrap it with <c> tags
+            for start_index, end_index in zip(largest_start_indices, largest_end_indices):
+                if start_index < end_index:
+                    new_tag_start = soup2.new_tag("c", tagid="6")
+                    new_tag_end = soup2.new_tag("c", tagid="7")
+                    all_tags[start_index].insert_before(new_tag_start)
+                    all_tags[end_index].insert_after(new_tag_end)
+
+# Call the function to wrap matching sections
+wrap_matching_sections(tags_list, all_tags, soup2)
+
+# Print the modified HTML content
+print(soup2.prettify())
